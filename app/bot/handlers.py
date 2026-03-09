@@ -5,6 +5,7 @@ from aiogram.types import Message
 from app.bot.states import CourseForm
 from app.calculator.gpa import calculate_gpa
 from app.model.course import Course
+from app.bot.keyboards import credits_keyboard, grades_keyboard, choice_keyboard
 
 router = Router()
 
@@ -17,21 +18,21 @@ async def cmd_start(message: Message, state: FSMContext):
 async def credits(message: Message, state: FSMContext):
     await state.update_data(name=message.text)
     await state.set_state(CourseForm.waiting_credits)
-    await message.answer("Weight of the course(credits)...")
+    await message.answer("Weight of the course(credits)...", reply_markup=credits_keyboard())
 
 @router.message(CourseForm.waiting_credits)
 async def grade(message: Message, state: FSMContext):
     await state.update_data(credits=message.text)
     await state.set_state(CourseForm.waiting_grade)
-    await message.answer("What is your grade?")
+    await message.answer("What is your grade?", reply_markup=grades_keyboard())
 
 @router.message(CourseForm.waiting_grade)
-async def calculate(message: Message, state: FSMContext):
+async def save_grade(message: Message, state: FSMContext):
     await state.update_data(grade=message.text)
     data = await state.get_data()
     new_course = Course(data["name"], data["credits"], data["grade"])
-    result = calculate_gpa([new_course])
-    text = (
-        f"That is your GPA - {result}"
-    )
+    # result = calculate_gpa([new_course])
+    # text = (
+    #     f"That is your GPA - {result}"
+    # )
     await message.answer(text)
