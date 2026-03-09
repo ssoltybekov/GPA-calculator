@@ -5,7 +5,8 @@ def credits_keyboard():
         keyboard=[
             [KeyboardButton(text="6"), KeyboardButton(text="8")],
         ],
-        resize_keyboard=True
+        resize_keyboard=True,
+        one_time_keyboard=True
     )
     return keyboard
 

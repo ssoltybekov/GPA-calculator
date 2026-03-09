@@ -10,9 +10,10 @@ from aiogram import F
 
 router = Router()
 
-@router.message(Command("Start"))
+@router.message(Command("start"))
 async def cmd_start(message: Message, state: FSMContext):
     await state.set_state(CourseForm.waiting_name)
+    # print("START CALLED")
     await message.answer("Name of the course...")
 
 @router.message(CourseForm.waiting_name)
@@ -23,7 +24,7 @@ async def credits(message: Message, state: FSMContext):
 
 @router.message(CourseForm.waiting_credits)
 async def grade(message: Message, state: FSMContext):
-    await state.update_data(credits=message.text)
+    await state.update_data(credits=float(message.text))
     await state.set_state(CourseForm.waiting_grade)
     await message.answer("What is your grade?", reply_markup=grades_keyboard())
 
@@ -52,4 +53,9 @@ async def evaluate(message: Message, state: FSMContext):
         f"That is your GPA - {result}"
     )
     await message.answer(text)
+
+@router.message(Command("cancel"))
+async def cancel(message: Message, state: FSMContext):
+    await state.clear()
+    await message.answer("Начали заново!")
 
