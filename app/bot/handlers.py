@@ -31,8 +31,15 @@ async def save_grade(message: Message, state: FSMContext):
     await state.update_data(grade=message.text)
     data = await state.get_data()
     new_course = Course(data["name"], data["credits"], data["grade"])
+    courses = data.get("courses", [])
+    courses.append(new_course)
+    await state.update_data(courses=courses)
+    await state.set_state(CourseForm.waiting_choice)
+    await message.answer("Do you want to add more courses or evaluate GPA?", reply_markup=choice_keyboard())
+    
     # result = calculate_gpa([new_course])
     # text = (
     #     f"That is your GPA - {result}"
     # )
-    await message.answer(text)
+    # await message.answer(text)
+
