@@ -1,0 +1,37 @@
+from aiogram import Router
+from aiogram.filters import Command
+from aiogram.fsm.context import FSMContext
+from aiogram.types import Message
+from app.bot.states import CourseForm
+from app.calculator.gpa import calculate_gpa
+from app.model.course import Course
+
+router = Router()
+
+@router.message(Command("Start"))
+async def cmd_start(message: Message, state: FSMContext):
+    await state.set_state(CourseForm.waiting_name)
+    await message.answer("Name of the course...")
+
+@router.message(CourseForm.waiting_name)
+async def credits(message: Message, state: FSMContext):
+    await state.update_data(name=message.text)
+    await state.set_state(CourseForm.waiting_credits)
+    await message.answer("Weight of the course(credits)...")
+
+@router.message(CourseForm.waiting_credits)
+async def grade(message: Message, state: FSMContext):
+    await state.update_data(credits=message.text)
+    await state.set_state(CourseForm.waiting_grade)
+    await message.answer("What is your grade?")
+
+@router.message(CourseForm.waiting_grade)
+async def calculate(message: Message, state: FSMContext):
+    await state.update_data(grade=message.text)
+    data = await state.get_data()
+    new_course = Course(data["name"], data["credits"], data["grade"])
+    result = calculate_gpa([new_course])
+    text = (
+        f"That is your GPA - {result}"
+    )
+    await message.answer(text)
